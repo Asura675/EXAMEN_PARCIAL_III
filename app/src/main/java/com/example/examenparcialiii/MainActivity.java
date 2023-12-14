@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.SplashTheme);
         try {
             Thread.sleep(4000);
             setTheme(R.style.Theme_EXAMENPARCIALIII);
