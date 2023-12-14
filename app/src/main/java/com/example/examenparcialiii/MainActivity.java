@@ -14,8 +14,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Response;
+import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.ImageLoader.ImageCache;
+
+import java.io.InputStream;
+import java.net.ResponseCache;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textView;
@@ -37,8 +42,14 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         progressBar = findViewById(R.id.progressBar);
 
+
+        progressBar.setVisibility(View.INVISIBLE);
+
+
+
+
         // Configurar OnClickListener para el botón
-        Button button = findViewById(R.id.button);
+        Button button = findViewById(R.id.FetchImageButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,15 +67,20 @@ public class MainActivity extends AppCompatActivity {
                     // Mostrar la barra de progreso al iniciar la descarga
                     progressBar.setVisibility(View.VISIBLE);
 
+                    TareaAsincrona task = new TareaAsincrona();
+                    task.execute(8);
+
                     ImageRequest imageRequest = new ImageRequest(
                             imageUrl,
                             new Response.Listener<Bitmap>() {
                                 @Override
                                 public void onResponse(Bitmap bitmap) {
+                                    textView.setVisibility(View.INVISIBLE);
                                     textView.setText("Imagen Descargada");
+                                    imageView.setVisibility(View.INVISIBLE);
                                     imageView.setImageBitmap(bitmap);
                                     // Ocultar la barra de progreso cuando la descarga se completa
-                                    progressBar.setVisibility(View.INVISIBLE);
+                                    //progressBar.setVisibility(View.INVISIBLE);
                                     isImageLoaded = true;
                                 }
                             },
@@ -82,13 +98,14 @@ public class MainActivity extends AppCompatActivity {
                             }
                     );
 
+
                     // Agregar la solicitud a la cola de solicitudes de Volley
                     VolleySingleton.getInstance(getApplicationContext())
                             .addToRequestQueue(imageRequest);
                 }
             }
         });
-        colorbutton= findViewById(R.id.colorbutton);
+        colorbutton= findViewById(R.id.ColorButton);
         int[] colors = {getResources().getColor(android.R.color.holo_green_light),
                 getResources().getColor(android.R.color.holo_blue_light),
                 getResources().getColor(android.R.color.holo_red_light)};
@@ -110,6 +127,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+
+/*
     private class TareaAsincrona extends AsyncTask<Void, Integer, String> {
         @Override
         protected void onPreExecute() {
@@ -145,5 +166,46 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setProgress(0);
             progressBar.setVisibility(View.INVISIBLE);
         }
+    }
+ */
+
+    private class TareaAsincrona extends AsyncTask<Integer,Integer,String>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        protected String doInBackground(Integer... integers) {
+            for(int i=0 ;i< integers[0]; i++){
+                publishProgress((i*100 / integers[0]));
+                try {
+                    Thread.sleep(25);
+                } catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            progressBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            textView.setVisibility(View.VISIBLE);
+            imageView.setVisibility(View.VISIBLE);
+            progressBar.setProgress(0);
+            progressBar.setVisibility(View.INVISIBLE);
+        }
+
+
     }
 }
