@@ -1,6 +1,7 @@
 package com.example.examenparcialiii;
 
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -10,6 +11,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     private Button colorbutton;
 
     private boolean isImageLoaded = false;
+    private Button alarmaButton;
+    private Ringtone ringtone;
+    MediaPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,54 +135,53 @@ public class MainActivity extends AppCompatActivity {
                 // Incrementar el índice para el próximo color
                 colorIndex = (colorIndex + 1) % colors.length;
 
+                if(player == null)
+                {
+                    player = MediaPlayer.create(MainActivity.this, R.raw.santaclause);
+                }
+                player.start();
+
                 // Mostrar el mensaje de Toast
                 Toast.makeText(MainActivity.this, "Nuevo botón presionado", Toast.LENGTH_SHORT).show();
             }
         });
+        alarmaButton = findViewById(R.id.AlarmButton);
+        alarmaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Configurar OnClickListener para el botón de la alarma
 
-    }
+                // Reproducir el sonido de la alarma
+                playAlarm();
 
-
-
-
-/*
-    private class TareaAsincrona extends AsyncTask<Void, Integer, String> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            // Simular un proceso largo en doInBackground
-            for (int i = 0; i < 5; i++) {
-                try {
-                    Thread.sleep(5000);
-                    publishProgress((i + 1) * 20); // Notificar el progreso
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                // Mostrar el mensaje de Toast
+                Toast.makeText(MainActivity.this, "Alarma activada", Toast.LENGTH_SHORT).show();
             }
+        });
 
-            return "Tarea asíncrona completa!";
-        }
+    }
+    private void playAlarm() {
+        try {
+            // Configurar el sonido de la alarma
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            ringtone = RingtoneManager.getRingtone(getApplicationContext(), alarmSound);
 
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            progressBar.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            Toast.makeText(MainActivity.this, s, Toast.LENGTH_LONG).show();
-            progressBar.setProgress(0);
-            progressBar.setVisibility(View.INVISIBLE);
+            // Reproducir el sonido
+            ringtone.play();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
- */
+
+    @Override
+    protected void onDestroy() {
+        // Detener la alarma al salir de la actividad
+        if (ringtone != null && ringtone.isPlaying()) {
+            ringtone.stop();
+        }
+
+        super.onDestroy();
+    }
 
     private class TareaAsincrona extends AsyncTask<Integer,Integer,String>{
 
